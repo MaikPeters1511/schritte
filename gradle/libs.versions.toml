@@ -22,6 +22,8 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
+glance-appwidget = { module = "androidx.glance:glance-appwidget", version = "1.1.1" }
+glance-material3 = { module = "androidx.glance:glance-material3", version = "1.1.1" }
 junit = { module = "junit:junit", version = "4.13.2" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.14.1" }

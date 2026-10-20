@@ -14,7 +14,10 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import de.schritte.app.R
 import de.schritte.app.SchritteApp
+import androidx.glance.appwidget.updateAll
 import de.schritte.app.domain.StepTracker
+import de.schritte.app.widget.StepsWidget
+import de.schritte.app.widget.WidgetRefresher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,7 +36,15 @@ class StepSensorService : Service(), SensorEventListener {
         val recorder = StepRecorder(
             StepTracker(app.clock.zone), { app.steps.load() }, { app.steps.save(it) }, app.clock,
         )
-        scope.launch { for (raw in events) recorder.record(raw) }
+        val refresher = WidgetRefresher(scope, 30_000, { System.currentTimeMillis() }) {
+            StepsWidget().updateAll(applicationContext)
+        }
+        scope.launch {
+            for (raw in events) {
+                recorder.record(raw)
+                refresher.request()
+            }
+        }
 
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(

@@ -38,6 +38,8 @@ dependencies {
     implementation(libs.datastore)
     implementation(libs.coroutines.android)
     implementation(libs.core.splashscreen)
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)

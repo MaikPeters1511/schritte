@@ -6,4 +6,5 @@
     <string name="tab_today">Heute</string>
     <string name="tab_stats">Statistik</string>
     <string name="tab_settings">Einstellungen</string>
+    <string name="widget_description">Schritte von heute mit Distanz und Kalorien</string>
 </resources>
