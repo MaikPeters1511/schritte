@@ -88,7 +88,7 @@ private fun Root(app: SchritteApp) {
         initializer { StatsViewModel(app.clock) { f, t -> app.steps.observeRange(f, t) } }
     })
     val settings = viewModel<SettingsViewModel>(factory = viewModelFactory {
-        initializer { SettingsViewModel(app.settings.settings, { app.settings.setDarkTheme(it) }) { h, w -> app.settings.update(h, w) } }
+        initializer { SettingsViewModel(app.settings.settings, { app.settings.setDarkTheme(it) }) { h, w, g -> app.settings.update(h, w, g) } }
     })
 
     Scaffold(bottomBar = {

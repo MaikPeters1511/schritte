@@ -25,11 +25,22 @@ class ViewModelsTest {
         assertEquals(10_000, ui.steps)
         assertEquals(7.47, ui.distanceKm, 1e-9)
         assertEquals(340.632, ui.kcal, 1e-6)
+        assertEquals(10_000, ui.goal)
+        assertEquals(1f, ui.progress, 0f)
+        assertEquals(100, ui.percent)
+    }
+
+    @Test fun today_progressUsesConfiguredGoal() = runBlocking {
+        val vm = TodayViewModel(flowOf(DayState(today, 5_000, 0)), flowOf(Settings(goalSteps = 20_000)), clock)
+        val ui = vm.ui.first()
+        assertEquals(20_000, ui.goal)
+        assertEquals(0.25f, ui.progress, 0f)
+        assertEquals(25, ui.percent)
     }
 
     @Test fun today_withoutData_isZero() = runBlocking {
         val ui = TodayViewModel(flowOf(null), flowOf(Settings()), clock).ui.first()
-        assertEquals(TodayUi(0, 0.0, 0.0), ui)
+        assertEquals(TodayUi(0, 0.0, 0.0, 10_000, 0f, 0), ui)
     }
 
     @Test fun stats_weekCoversLastSevenDaysIncludingToday() = runBlocking {
@@ -64,9 +75,9 @@ class ViewModelsTest {
     }
 
     @Test fun settings_saveReturnsFalseWhenInvalid() = runBlocking {
-        val vm = SettingsViewModel(flowOf(Settings()), { _ -> }) { h, _ -> require(h >= 100) }
-        assertFalse(vm.save(50, 70))
-        assertTrue(vm.save(180, 70))
+        val vm = SettingsViewModel(flowOf(Settings()), { _ -> }) { h, _, _ -> require(h >= 100) }
+        assertFalse(vm.save(50, 70, 10_000))
+        assertTrue(vm.save(180, 70, 10_000))
     }
 
     @Test fun today_ignoresStepsFromEarlierDay() = runBlocking {
@@ -77,7 +88,7 @@ class ViewModelsTest {
 
     @Test fun settings_setDarkThemeDelegates() = runBlocking {
         var received: Boolean? = null
-        val vm = SettingsViewModel(flowOf(Settings()), { received = it }) { _, _ -> }
+        val vm = SettingsViewModel(flowOf(Settings()), { received = it }) { _, _, _ -> }
         vm.setDarkTheme(true)
         assertEquals(true, received)
     }

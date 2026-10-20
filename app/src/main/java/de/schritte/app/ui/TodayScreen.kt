@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,14 +19,23 @@ import java.util.Locale
 
 @Composable
 fun TodayScreen(vm: TodayViewModel, modifier: Modifier = Modifier) {
-    val ui by vm.ui.collectAsStateWithLifecycle(TodayUi(0, 0.0, 0.0))
+    val ui by vm.ui.collectAsStateWithLifecycle(TodayUi(0, 0.0, 0.0, 10_000, 0f, 0))
     Column(
         modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(String.format(Locale.GERMANY, "%,d", ui.steps), style = MaterialTheme.typography.displayLarge)
-        Text("Schritte heute", style = MaterialTheme.typography.titleMedium)
+        GoalRing(ui.progress, reached = ui.percent >= 100, modifier = Modifier.size(280.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(String.format(Locale.GERMANY, "%,d", ui.steps), style = MaterialTheme.typography.displayMedium)
+                Text("Schritte heute", style = MaterialTheme.typography.titleMedium)
+            }
+        }
+        Text(
+            String.format(Locale.GERMANY, "%d %% vom Ziel (%,d)", ui.percent, ui.goal),
+            modifier = Modifier.padding(top = 16.dp),
+            style = MaterialTheme.typography.titleMedium,
+        )
         Row(Modifier.fillMaxWidth().padding(top = 32.dp), Arrangement.SpaceEvenly) {
             Metric(String.format(Locale.GERMANY, "%.2f km", ui.distanceKm), "Distanz")
             Metric(String.format(Locale.GERMANY, "%.0f kcal", ui.kcal), "Kalorien")
