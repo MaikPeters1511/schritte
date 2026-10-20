@@ -4,3 +4,11 @@ build/
 local.properties
 .idea/
 .DS_Store
+
+# JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.fleet/
