@@ -25,4 +25,7 @@ class ChartScaleTest {
         assertEquals(listOf(4, 9, 14, 19, 24, 29), ChartScale.labelIndices(30))
 
     @Test fun labelIndices_emptyForNoDays() = assertEquals(emptyList<Int>(), ChartScale.labelIndices(0))
+
+    @Test fun labelIndices_twelveMonthsAreAllLabelled() =
+        assertEquals((0..11).toList(), ChartScale.labelIndices(12))
 }

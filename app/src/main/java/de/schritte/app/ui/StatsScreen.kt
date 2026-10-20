@@ -14,25 +14,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import de.schritte.app.domain.Stats
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
 fun StatsScreen(vm: StatsViewModel, modifier: Modifier = Modifier) {
     val range by vm.range.collectAsStateWithLifecycle()
-    val stats by vm.stats.collectAsStateWithLifecycle(Stats(emptyList(), 0, 0, null))
+    val stats by vm.stats.collectAsStateWithLifecycle(StatsUi.Empty)
     Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(range == StatsRange.WEEK, { vm.range.value = StatsRange.WEEK }, { Text("Woche") })
             FilterChip(range == StatsRange.MONTH, { vm.range.value = StatsRange.MONTH }, { Text("Monat") })
+            FilterChip(range == StatsRange.YEAR, { vm.range.value = StatsRange.YEAR }, { Text("Jahr") })
         }
-        LineChart(stats.days, Modifier.fillMaxWidth().height(220.dp))
+        LineChart(stats.points, Modifier.fillMaxWidth().height(220.dp))
         val fmt = { n: Int -> String.format(Locale.GERMANY, "%,d", n) }
         Text("Summe: ${fmt(stats.total)}", style = MaterialTheme.typography.titleMedium)
         Text("Durchschnitt pro Tag: ${fmt(stats.average)}")
         stats.best?.let {
-            Text("Bester Tag: ${it.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))} (${fmt(it.steps)})")
+            Text("${if (range == StatsRange.YEAR) "Bester Monat" else "Bester Tag"}: ${it.label} (${fmt(it.steps)})")
         }
     }
 }

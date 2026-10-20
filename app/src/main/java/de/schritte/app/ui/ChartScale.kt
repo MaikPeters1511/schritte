@@ -16,7 +16,7 @@ object ChartScale {
 
     fun labelIndices(count: Int): List<Int> = when {
         count <= 0 -> emptyList()
-        count <= 7 -> (0 until count).toList()
+        count <= 12 -> (0 until count).toList()
         else -> (0 until count).filter { (count - 1 - it) % 5 == 0 }
     }
 }

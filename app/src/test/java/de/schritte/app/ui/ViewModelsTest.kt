@@ -37,14 +37,30 @@ class ViewModelsTest {
         val vm = StatsViewModel(clock) { f, t -> asked = f to t; flowOf(mapOf(today to 500)) }
         val s = vm.stats.first()
         assertEquals(today.minusDays(6) to today, asked)
-        assertEquals(7, s.days.size)
+        assertEquals(7, s.points.size)
+        assertEquals(ChartPoint("20.10.", 500), s.points.last())
         assertEquals(500, s.total)
+        assertEquals(BestUi("20.10.2026", 500), s.best)
     }
 
     @Test fun stats_monthCoversLastThirtyDays() = runBlocking {
         val vm = StatsViewModel(clock) { _, _ -> flowOf(emptyMap()) }
         vm.range.value = StatsRange.MONTH
-        assertEquals(30, vm.stats.first().days.size)
+        assertEquals(30, vm.stats.first().points.size)
+    }
+
+    @Test fun stats_yearCoversLastTwelveMonthsAsMonthlySums() = runBlocking {
+        var asked: Pair<LocalDate, LocalDate>? = null
+        val data = mapOf(today to 500, today.minusDays(5) to 250)
+        val vm = StatsViewModel(clock) { f, t -> asked = f to t; flowOf(data) }
+        vm.range.value = StatsRange.YEAR
+        val s = vm.stats.first()
+        assertEquals(LocalDate.of(2025, 11, 1) to today, asked)
+        assertEquals(12, s.points.size)
+        assertEquals("Nov", s.points.first().label)
+        assertEquals(ChartPoint("Okt", 750), s.points.last())
+        assertEquals(750, s.total)
+        assertEquals(BestUi("Oktober 2026", 750), s.best)
     }
 
     @Test fun settings_saveReturnsFalseWhenInvalid() = runBlocking {
