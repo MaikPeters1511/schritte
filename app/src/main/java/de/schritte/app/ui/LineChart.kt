@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.sp
 import java.util.Locale
 
 @Composable
-fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier) {
+fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, previous: List<Int>? = null) {
     val line = MaterialTheme.colorScheme.primary
     val grid = MaterialTheme.colorScheme.outlineVariant
     val textColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -29,7 +30,7 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier) {
         val right = 20.dp.toPx()
         val plotW = size.width - left - right
         val plotH = size.height - bottom - top
-        val max = ChartScale.niceMax(points.maxOfOrNull { it.value } ?: 0)
+        val max = ChartScale.niceMax(ChartScale.peak(points.map { it.value }, previous))
 
         fun y(v: Int) = top + plotH * (1f - v.toFloat() / max)
         fun x(i: Int) = left + if (points.size <= 1) plotW / 2 else plotW * i / (points.size - 1)
@@ -44,6 +45,16 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier) {
         ChartScale.labelIndices(points.size).forEach { i ->
             val m = measurer.measure(points[i].label, label)
             drawText(m, topLeft = Offset(x(i) - m.size.width / 2f, size.height - bottom + 6.dp.toPx()))
+        }
+
+        if (previous != null && previous.size > 1) {
+            val ghost = Path()
+            previous.forEachIndexed { i, v -> if (i == 0) ghost.moveTo(x(i), y(v)) else ghost.lineTo(x(i), y(v)) }
+            drawPath(
+                ghost,
+                textColor.copy(alpha = 0.75f),
+                style = Stroke(width = 2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 10f))),
+            )
         }
 
         val path = Path()

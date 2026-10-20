@@ -28,4 +28,11 @@ class ChartScaleTest {
 
     @Test fun labelIndices_twelveMonthsAreAllLabelled() =
         assertEquals((0..11).toList(), ChartScale.labelIndices(12))
+
+    @Test fun peak_isLargestValueAcrossSeries() =
+        assertEquals(9, ChartScale.peak(listOf(1, 5), listOf(9, 2)))
+
+    @Test fun peak_ignoresMissingSeries() = assertEquals(5, ChartScale.peak(listOf(1, 5), null))
+
+    @Test fun peak_isZeroWithoutData() = assertEquals(0, ChartScale.peak(emptyList(), null))
 }

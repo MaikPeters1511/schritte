@@ -12,6 +12,8 @@ object ChartScale {
         return tenths * magnitude / 10
     }
 
+    fun peak(vararg series: List<Int>?): Int = series.filterNotNull().flatten().maxOrNull() ?: 0
+
     fun yTicks(niceMax: Int): List<Int> = listOf(0, niceMax / 2, niceMax)
 
     fun labelIndices(count: Int): List<Int> = when {

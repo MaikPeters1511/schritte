@@ -2,7 +2,9 @@ package de.schritte.app.ui
 
 import androidx.lifecycle.ViewModel
 import de.schritte.app.domain.MonthlyAggregator
+import de.schritte.app.domain.Stats
 import de.schritte.app.domain.StatsAggregator
+import de.schritte.app.domain.compareWeeks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +21,15 @@ data class ChartPoint(val label: String, val value: Int)
 
 data class BestUi(val label: String, val steps: Int)
 
-data class StatsUi(val points: List<ChartPoint>, val total: Int, val average: Int, val best: BestUi?) {
+data class ComparisonUi(val previous: List<Int>, val previousTotal: Int, val diff: Int, val percent: Int?)
+
+data class StatsUi(
+    val points: List<ChartPoint>,
+    val total: Int,
+    val average: Int,
+    val best: BestUi?,
+    val comparison: ComparisonUi? = null,
+) {
     companion object { val Empty = StatsUi(emptyList(), 0, 0, null) }
 }
 
@@ -41,21 +51,31 @@ class StatsViewModel(
     val stats: Flow<StatsUi> = range.flatMapLatest { r ->
         val to = LocalDate.now(clock)
         when (r) {
-            StatsRange.WEEK -> daily(to.minusDays(6), to)
+            StatsRange.WEEK -> week(to)
             StatsRange.MONTH -> daily(to.minusDays(29), to)
             StatsRange.YEAR -> monthly(to.withDayOfMonth(1).minusMonths(11), to)
         }
     }
 
     private fun daily(from: LocalDate, to: LocalDate) = stepsInRange(from, to).map { data ->
-        val s = StatsAggregator.summarize(data, from, to)
-        StatsUi(
-            s.days.map { ChartPoint(it.date.format(dayLabel), it.steps) },
-            s.total,
-            s.average,
-            s.best?.let { BestUi(it.date.format(dayFull), it.steps) },
+        dailyUi(StatsAggregator.summarize(data, from, to))
+    }
+
+    private fun week(to: LocalDate) = stepsInRange(to.minusDays(13), to).map { data ->
+        val current = StatsAggregator.summarize(data, to.minusDays(6), to)
+        val previous = StatsAggregator.summarize(data, to.minusDays(13), to.minusDays(7))
+        val diff = compareWeeks(current.total, previous.total)
+        dailyUi(current).copy(
+            comparison = ComparisonUi(previous.days.map { it.steps }, previous.total, diff.diff, diff.percent),
         )
     }
+
+    private fun dailyUi(s: Stats) = StatsUi(
+        s.days.map { ChartPoint(it.date.format(dayLabel), it.steps) },
+        s.total,
+        s.average,
+        s.best?.let { BestUi(it.date.format(dayFull), it.steps) },
+    )
 
     private fun monthly(from: LocalDate, to: LocalDate) = stepsInRange(from, to).map { data ->
         val s = MonthlyAggregator.summarize(data, from, to)
