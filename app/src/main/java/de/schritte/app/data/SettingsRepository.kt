@@ -5,8 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 
 data class Settings(val heightCm: Int = 175, val weightKg: Int = 70, val darkTheme: Boolean? = null, val goalSteps: Int = 10_000)
 
@@ -15,6 +18,7 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
     private val weight = intPreferencesKey("weight_kg")
     private val dark = booleanPreferencesKey("dark_theme")
     private val goal = intPreferencesKey("goal_steps")
+    private val goalNotified = stringPreferencesKey("goal_notified_date")
 
     val settings: Flow<Settings> = store.data.map {
         Settings(it[height] ?: 175, it[weight] ?: 70, it[dark], it[goal] ?: 10_000)
@@ -29,5 +33,12 @@ class SettingsRepository(private val store: DataStore<Preferences>) {
 
     suspend fun setDarkTheme(enabled: Boolean) {
         store.edit { it[dark] = enabled }
+    }
+
+    suspend fun lastGoalNotificationDate(): LocalDate? =
+        store.data.first()[goalNotified]?.let(LocalDate::parse)
+
+    suspend fun markGoalNotified(date: LocalDate) {
+        store.edit { it[goalNotified] = date.toString() }
     }
 }

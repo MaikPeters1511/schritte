@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class StepSensorService : Service(), SensorEventListener {
@@ -39,9 +40,16 @@ class StepSensorService : Service(), SensorEventListener {
         val refresher = WidgetRefresher(scope, 30_000, { System.currentTimeMillis() }) {
             StepsWidget().updateAll(applicationContext)
         }
+        val goalNotifier = GoalNotifier(
+            goal = { app.settings.settings.first().goalSteps },
+            lastNotified = { app.settings.lastGoalNotificationDate() },
+            markNotified = { app.settings.markGoalNotified(it) },
+            notify = { steps, goal -> GoalNotification(applicationContext).show(steps, goal) },
+        )
         scope.launch {
             for (raw in events) {
-                recorder.record(raw)
+                val state = recorder.record(raw)
+                goalNotifier.onSteps(state)
                 refresher.request()
             }
         }

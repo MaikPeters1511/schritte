@@ -10,7 +10,9 @@ class StepRecorder(
     private val save: suspend (DayState) -> Unit,
     private val clock: Clock,
 ) {
-    suspend fun record(raw: Long) {
-        save(tracker.onSensor(load(), raw, clock.instant()))
+    suspend fun record(raw: Long): DayState {
+        val state = tracker.onSensor(load(), raw, clock.instant())
+        save(state)
+        return state
     }
 }

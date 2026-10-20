@@ -33,4 +33,9 @@ class StepRecorderTest {
         recorder.record(12)
         assertEquals(DayState(day, 512, 12), stored)
     }
+
+    @Test fun record_returnsTheNewState() = runBlocking {
+        recorder.record(1000)
+        assertEquals(DayState(day, 25, 1025), recorder.record(1025))
+    }
 }

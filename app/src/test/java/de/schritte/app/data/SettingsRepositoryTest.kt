@@ -78,4 +78,21 @@ class SettingsRepositoryTest {
         }
         assertEquals(Settings(180, 80, goalSteps = 8_000), r.settings.first())
     }
+
+    @Test fun goalNotification_defaultsToNever() = runBlocking {
+        assertEquals(null, repo().lastGoalNotificationDate())
+    }
+
+    @Test fun goalNotification_dateIsPersisted() = runBlocking {
+        val r = repo()
+        r.markGoalNotified(java.time.LocalDate.of(2026, 10, 20))
+        assertEquals(java.time.LocalDate.of(2026, 10, 20), r.lastGoalNotificationDate())
+    }
+
+    @Test fun goalNotification_doesNotTouchOtherSettings() = runBlocking {
+        val r = repo()
+        r.update(180, 80, 12_000)
+        r.markGoalNotified(java.time.LocalDate.of(2026, 10, 20))
+        assertEquals(Settings(180, 80, goalSteps = 12_000), r.settings.first())
+    }
 }
