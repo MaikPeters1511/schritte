@@ -37,6 +37,7 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.datastore)
     implementation(libs.coroutines.android)
+    implementation(libs.core.splashscreen)
 
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
