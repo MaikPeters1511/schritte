@@ -48,7 +48,7 @@ class ViewModelsTest {
     }
 
     @Test fun settings_saveReturnsFalseWhenInvalid() = runBlocking {
-        val vm = SettingsViewModel(flowOf(Settings())) { h, _ -> require(h >= 100) }
+        val vm = SettingsViewModel(flowOf(Settings()), { _ -> }) { h, _ -> require(h >= 100) }
         assertFalse(vm.save(50, 70))
         assertTrue(vm.save(180, 70))
     }
@@ -57,5 +57,12 @@ class ViewModelsTest {
         val yesterday = DayState(today.minusDays(1), 8_000, 0)
         val ui = TodayViewModel(flowOf(yesterday), flowOf(Settings()), clock).ui.first()
         assertEquals(0, ui.steps)
+    }
+
+    @Test fun settings_setDarkThemeDelegates() = runBlocking {
+        var received: Boolean? = null
+        val vm = SettingsViewModel(flowOf(Settings()), { received = it }) { _, _ -> }
+        vm.setDarkTheme(true)
+        assertEquals(true, received)
     }
 }
